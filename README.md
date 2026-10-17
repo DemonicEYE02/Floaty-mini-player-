@@ -6,11 +6,11 @@
 
 A lightweight Manifest V3 extension for **Google Chrome** and **Microsoft Edge**.
 
-![version](https://img.shields.io/badge/version-1.3.1-2f6df6?style=flat-square)
+![version](https://img.shields.io/badge/version-1.3.2-2f6df6?style=flat-square)
 ![platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Edge-1ed760?style=flat-square)
 ![manifest](https://img.shields.io/badge/manifest-v3-ff8a3d?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
-![size](https://img.shields.io/badge/size-%7E81%20KB-8a8a99?style=flat-square)
+![size](https://img.shields.io/badge/size-%7E84%20KB-8a8a99?style=flat-square)
 
 </div>
 
@@ -35,7 +35,7 @@ It is designed to be **extremely light**: the interface is only created in a tab
 | **Mini window** | Always-on-top, draggable, resizable, fully interactive. Links open in a normal tab. |
 | **Crop** | Drag a box over any part of a page → only that part becomes the mini window. |
 | **Music disc** | Spinning thumbnail, colour-matched wave ring, −5s / play / +5s, progress + seek, drag & wheel-resize. |
-| **Music bar** | Slim horizontal player: thumbnail, title/artist, wave, progress + seek, controls, background toggles. |
+| **Music bar** | Slim horizontal player: thumbnail, title/artist, wave, progress + seek, controls — with the background looks tucked into a small **palette button** so the bar stays short. |
 | **Real audio waves** | YouTube Music is analysed directly; Spotify's tab audio is captured in the background for the visualiser only (sound keeps playing). |
 | **Auto ad-skip** | YouTube & YouTube Music ads are skipped, or muted-and-run-past, automatically. |
 | **Backgrounds** | 🌙 Dark · ☁ Transparent · ☀ White — applied to the disc *and* the bar. |
@@ -151,6 +151,11 @@ Floaty asks for exactly what it uses. Nothing is sent to any server; there is no
 ## 🧾 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md). Latest:
+
+**1.3.2**
+- 🎨 **Shorter, cleaner music bar** — the 🌙 / ☁ / ☀ background looks moved out of the row and into a small **palette button** at the end of the bar; hover or tap it and they pop up (above the bar, or below it near the top of the screen).
+- 📏 **Shorter bar, wider seek strip** — about a tenth less width, yet more room for the progress bar than before.
+- 🧹 All the 1.3.1 behaviour (follow-across-tabs, self-update, no stuck UI) is unchanged.
 
 **1.3.1**
 - 🧲 **The disc and bar follow you** — turn the player on once and it reappears on every page and tab, in your chosen look, until you close it. Toggling it syncs across tabs instantly.

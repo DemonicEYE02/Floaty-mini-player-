@@ -3,7 +3,7 @@
 Pop any page into a small floating window, crop just the part you need, and keep a
 transparent music disc — or a compact music bar — on screen while you browse. Works in **Chrome and Edge 116 or newer**.
 
-Version **1.3.1**
+Version **1.3.2**
 
 ---
 
@@ -104,8 +104,10 @@ A slim, horizontal player — handy when you want the controls without covering 
 
 - Thumbnail, song title and artist on the left.
 - A **progress bar** with the current / total time; **click or drag** it to seek.
-- **−5s / Play / +5s** buttons, the same **dark / transparent / white** background buttons,
-  a **◉** button to switch back to the disc, and an **×** to hide it.
+- **−5s / Play / +5s** buttons, a **◉** button to switch back to the disc, and an **×** to hide it.
+- A small **palette button** holds the three looks — 🌙 **dark** · ☁ **transparent** · ☀ **white**.
+  Hover (or tap) it and they pop up above the bar; click one and the bar and the disc change
+  together. Keeping them behind a button is what lets the bar stay short.
 - Its own little **wave** bars that dance with the music.
 - **Drag it** anywhere and use the **mouse wheel** to resize.
 
@@ -141,7 +143,17 @@ volume too.)
 
 ---
 
-## 6. What's new in 1.3.1
+## 6. What's new in 1.3.2
+
+- **The music bar is shorter and cleaner.** Its **dark / transparent / white** looks moved out of
+  the row and into a small **palette button** at the end of the bar — hover or tap it and the three
+  looks pop up. Nothing was taken away, the bar just stopped being so long.
+- **More room for the progress bar** at the same time: the bar is about a tenth shorter than
+  before, yet the seek bar inside it is *wider* than it used to be.
+- The picker opens **above** the bar, flips **below** it when the bar sits near the top of the
+  screen, and stays open while you try all three looks.
+
+## 7. What's new in 1.3.1
 
 - **The disc and the bar now follow you.** Turn the music player on once and it comes back on
   every other page and tab you open — in the look you chose — until you close it with the **x**.
@@ -157,7 +169,7 @@ volume too.)
 - **New tabs fill in instantly** — a page that turns the player on shows the current song,
   progress and waves straight away.
 
-## 7. What's new in 1.3.0
+## 8. What's new in 1.3.0
 
 - **Much lighter on your computer.** Floaty now builds its window, waves and music UI **only when
   you actually use them** in a tab. Tabs where you never open Floaty cost almost nothing — no
@@ -170,7 +182,7 @@ volume too.)
 - **Gentler startup** — when the extension updates, it attaches to your open tabs in small steps
   instead of all at once.
 
-## 8. What's new in 1.2.0
+## 9. What's new in 1.2.0
 
 - **New music bar** (**Alt + 4**): a slim horizontal player with thumbnail, title/artist, a
   progress bar, the −5s / play / +5s buttons, background buttons, its own wave, and a close
@@ -191,7 +203,7 @@ volume too.)
 
 ---
 
-## 9. Good to know
+## 10. Good to know
 
 - The transparent disc lives **inside the browser**. Browsers cannot draw transparent windows
   over other apps, so it will **not** float above your desktop.
@@ -210,7 +222,7 @@ volume too.)
 
 ---
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 - **Shortcuts do nothing?** **Click the extension icon** in the toolbar: you should see *Floaty
   is active*. Floaty attaches itself to tabs you already had open, so a reload is rarely needed.

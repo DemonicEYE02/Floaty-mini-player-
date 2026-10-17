@@ -13,7 +13,7 @@
   var hostEl = null, toastT = 0, dropT = 0, watchT = 0, port = null, running = false,
       srcLoop = false, activePip = null, activeRestore = null, adTimer = 0, cancelCrop = null, mediaPlayFn = null;
 
-  const VERSION = '1.3.1';
+  const VERSION = '1.3.2';
 
   /* ───────────────────────────────────────────────────────────────────────────
      LIGHTWEIGHT BY DESIGN
@@ -125,7 +125,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
 #bgr{display:flex;justify-content:center;gap:10px;margin-top:6px}
 #bgr button,#bbgr button{display:grid;place-items:center;color:var(--c);opacity:.55;border-radius:50%;transition:opacity .15s,background .15s}
 #bgr button{width:26px;height:26px}
-#bbgr button{width:20px;height:20px}
+#bbgr button{width:24px;height:24px}
 #bgr button:hover,#bbgr button:hover{opacity:.9}
 #bgr button.on,#bbgr button.on{opacity:1;background:color-mix(in srgb,var(--c) 26%,transparent);box-shadow:0 0 0 1.5px var(--c)}
 #bgr svg{width:17px;height:17px;fill:currentColor}
@@ -140,9 +140,9 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
 #bar.bg-dark #bplate{background:rgba(15,15,18,.74);backdrop-filter:blur(10px)}
 #bar.bg-light #bplate{background:rgba(255,255,255,.9);backdrop-filter:blur(10px)}
 #bar.bg-none #bplate{background:transparent}
-#bin{position:relative;z-index:1;display:flex;align-items:center;gap:8px;padding:6px 10px;zoom:var(--s,1);width:620px}
+#bin{position:relative;z-index:1;display:flex;align-items:center;gap:6px;padding:6px 8px;zoom:var(--s,1);width:560px}
 #bart{width:42px;height:42px;border-radius:10px;object-fit:cover;flex:none;background:#000;box-shadow:0 0 0 2px var(--c)}
-#bmeta{width:104px;flex:none;min-width:0}
+#bmeta{width:96px;flex:none;min-width:0}
 #btitle{color:var(--c);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bartist{color:var(--c);opacity:.72;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bwave{width:76px;height:34px;flex:none;pointer-events:none}
@@ -156,8 +156,19 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
 #bctrl button:hover{transform:scale(1.12)}
 #bctrl svg{width:21px;height:21px;fill:currentColor}
 #bctrl small{position:absolute;bottom:-3px;font-size:9px;font-weight:700}
-#bbgr{display:flex;gap:3px;flex:none}
-#bbgr svg{width:14px;height:14px;fill:currentColor}
+/* The three background looks live behind a small palette button, so they no longer stretch
+   the row — hover (or tap) it and they pop up above the bar. */
+#bpop{flex:none;display:flex;align-items:center}
+#bbtn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:var(--c);opacity:.7;
+  transition:opacity .15s,background .15s}
+#bbtn:hover{opacity:1;background:color-mix(in srgb,var(--c) 24%,transparent)}
+#bpop.on #bbtn{opacity:1;background:color-mix(in srgb,var(--c) 26%,transparent);box-shadow:0 0 0 1.5px var(--c)}
+#bbtn svg{width:16px;height:16px;fill:currentColor}
+#bbgr{position:absolute;right:0;bottom:calc(100% + 8px);z-index:9;display:none;gap:4px;padding:7px 8px;border-radius:16px;
+  background:rgba(16,16,20,.93);backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+#bpop.on #bbgr{display:flex}
+#bar.bg-light #bbgr{background:rgba(255,255,255,.97);box-shadow:0 8px 22px rgba(0,0,0,.22)}
+#bbgr svg{width:15px;height:15px;fill:currentColor}
 #bclose,#bmode{flex:none;color:var(--c);line-height:1;padding:2px 5px;border-radius:8px;opacity:.85;transition:opacity .15s,background .15s}
 #bclose{font-size:17px}
 #bmode{font-size:15px}
@@ -206,7 +217,10 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
       <button data-a="play" id="bpp" title="Play / pause (Alt+P)"></button>
       <button data-a="fwd" title="Forward 5s"><svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6zM3 6v12l8.5-6z"/></svg><small>5s</small></button>
     </div>
-    <div id="bbgr"></div>
+    <div id="bpop">
+      <button id="bbtn" title="Background: dark · transparent · white"><svg viewBox="0 0 24 24"><path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5C21 6.53 17.03 3 12 3zM6.5 12c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></button>
+      <div id="bbgr"></div>
+    </div>
     <button id="bmode" title="Switch to the disc (Alt+3)">◉</button>
     <button id="bclose" title="Hide (Alt+4 shows it again)">×</button>
   </div>
@@ -282,7 +296,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     for (const id of ['crop', 'sel', 'open', 'hint', 'panel', 'pbar', 'pplay', 'pclose', 'pbody', 'pgrip',
       'disc', 'plate', 'in', 'stage', 'viz', 'vinyl', 'art', 'ctrl', 'pp', 'prog', 'ptrack', 'pfill', 'phandle', 'ptime',
       'bgr', 'dmode', 'x', 'bar', 'bplate', 'bin', 'bart', 'bmeta', 'btitle', 'bartist', 'bwave', 'bmid', 'bprog',
-      'bpf', 'bph', 'btime', 'bctrl', 'bpp', 'bbgr', 'bmode', 'bclose']) el[id] = $(id);
+      'bpf', 'bph', 'btime', 'bctrl', 'bpp', 'bpop', 'bbtn', 'bbgr', 'bmode', 'bclose']) el[id] = $(id);
 
     el.cx = fitCanvas(el.viz, 200, 200);
     el.bcx = fitCanvas(el.bwave, 76, 34);
@@ -524,7 +538,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
 
     let dBar = null;
     el.bar.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('button,#bprog')) return;
+      if (e.target.closest('button,#bprog,#bbgr')) return;
       dBar = { dx: e.clientX - el.bar.offsetLeft, dy: e.clientY - el.bar.offsetTop };
       try { el.bar.setPointerCapture(e.pointerId); } catch (err) {}
     });
@@ -549,6 +563,35 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     };
     el.bgr.addEventListener('click', onBg);
     el.bbgr.addEventListener('click', onBg);
+
+    // Bar background picker: hidden behind a palette button so the row stays short. It opens on
+    // hover with a mouse, on tap, and flips above/below whichever side has room.
+    const setPop = (on) => {
+      if (!el.bpop) return;
+      el.bpop.classList.toggle('on', on);
+      if (!on) return;
+      const ph = el.bbgr.getBoundingClientRect().height;
+      const br = el.bin.getBoundingClientRect();
+      const roomAbove = br.top - ph - 10 > 0;
+      const roomBelow = br.bottom + ph + 10 < innerHeight;
+      const below = !roomAbove && roomBelow;
+      // Set the unused edge to `auto` explicitly — an empty string would fall back to the
+      // stylesheet's `bottom` and over-constrain the box (the picker would collapse to its padding).
+      el.bbgr.style.bottom = below ? 'auto' : 'calc(100% + 8px)';
+      el.bbgr.style.top = below ? 'calc(100% + 8px)' : 'auto';
+    };
+    el.bpop.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setPop(true); });
+    el.bpop.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setPop(false); });
+    el.bbtn.addEventListener('click', (e) => { e.stopPropagation(); setPop(!el.bpop.classList.contains('on')); });
+  }
+
+  // Taps/clicks outside the bar's palette button dismiss its background picker (module scope so
+  // destroy() can take it back off — a hot-swapped instance must not leave listeners behind).
+  function onDocPointer(e) {
+    if (!el.bpop || !el.bpop.classList.contains('on')) return;
+    const path = e.composedPath ? e.composedPath() : [];
+    if (path.indexOf(el.bpop) !== -1) return;
+    el.bpop.classList.remove('on');
   }
 
   // The disc/bar buttons control the music source; if there is none, they control a video on the page.
@@ -969,6 +1012,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     }
   }
   window.addEventListener('keydown', onGlobalKey, true);
+  document.addEventListener('pointerdown', onDocPointer, true);
 
   chrome.runtime.onMessage.addListener((m) => {
     if (!ok()) return;
@@ -1254,6 +1298,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     running = false;
     srcLoop = false;
     try { window.removeEventListener('keydown', onGlobalKey, true); } catch (e) {}
+    try { document.removeEventListener('pointerdown', onDocPointer, true); } catch (e) {}
     try { if (toastT) clearTimeout(toastT); } catch (e) {}
     try { if (dropT) clearTimeout(dropT); } catch (e) {}
     try { if (watchT) clearTimeout(watchT); } catch (e) {}

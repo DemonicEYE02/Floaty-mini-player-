@@ -5,6 +5,26 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.2] — 2026-10-18
+
+### 🎨 Changed
+- **The music bar is shorter and cleaner.** Its three background looks (dark / transparent /
+  white) no longer sit inline in the row — they moved into a small **palette button** at the end
+  of the bar. Hover (mouse) or tap the button and the three looks pop up; click one and both the
+  bar and the disc switch together. Nothing was removed, the bar simply stopped being so long.
+- **Tighter bar layout.** The bar is 620 px → **560 px** wide (about 10% shorter) while the seek
+  strip inside it grew from ~121 px to **~130 px**, thanks to slightly tighter spacing and a
+  narrower title block.
+
+### 🩹 Fixed
+- **The picker never collapses or overlaps the bar.** It is anchored to the bar itself and flips
+  above / below depending on the room available, always keeping an 8 px gap and its right edge
+  flush with the bar.
+- Tapping anywhere outside the picker dismisses it, and the bar still drags normally from the
+  picker area (the picker itself can never start a drag).
+
+---
+
 ## [1.3.1] — 2026-10-17
 
 ### ✨ Added
