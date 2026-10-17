@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floaty Mini Player — Quick Guide</title>
+<style>
+  :root{
+    --bg:#0f1014; --card:#171920; --line:#2a2d38; --ink:#e9eaf0; --muted:#9aa0b0;
+    --accent:#3f7cff; --accent2:#1ed760; --chip:#232634;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); padding:40px 18px 80px;
+  }
+  .wrap{max-width:860px;margin:0 auto}
+  header.hero{
+    background:linear-gradient(135deg,#1b1f3a,#12203a 45%,#10251c);
+    border:1px solid var(--line); border-radius:20px; padding:34px 32px; margin-bottom:28px;
+    box-shadow:0 22px 60px rgba(0,0,0,.45);
+  }
+  header.hero h1{margin:0 0 8px; font-size:32px; letter-spacing:-.5px}
+  header.hero p{margin:0; color:#c7ccdb; max-width:60ch}
+  .badge{display:inline-block; font-size:12px; font-weight:600; letter-spacing:.4px;
+    background:rgba(63,124,255,.16); color:#9fc0ff; border:1px solid rgba(63,124,255,.4);
+    padding:3px 10px; border-radius:999px; margin-bottom:14px}
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:24px 26px; margin:0 0 20px}
+  h2{margin:0 0 14px; font-size:21px; display:flex; align-items:center; gap:10px}
+  h2 .n{display:grid;place-items:center; width:28px; height:28px; border-radius:9px;
+    background:var(--accent); color:#fff; font-size:14px; font-weight:700; flex:none}
+  h3{margin:20px 0 8px; font-size:16px; color:#cdd3e2}
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 12px; padding-left:22px}
+  li{margin:5px 0}
+  a{color:#9fc0ff}
+  code{background:var(--chip); border:1px solid var(--line); border-radius:6px;
+    padding:1px 6px; font-size:13.5px}
+  kbd{background:#262a36; border:1px solid #3b4050; border-bottom-width:2px; border-radius:6px;
+    padding:1px 8px; font-family:inherit; font-size:13px; color:#fff; white-space:nowrap}
+  table{width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:15px}
+  th,td{text-align:left; vertical-align:top; padding:10px 12px; border-bottom:1px solid var(--line)}
+  th{color:var(--muted); font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.5px}
+  tr:last-child td{border-bottom:0}
+  .keys{white-space:nowrap; font-weight:600}
+  .note{border-left:3px solid var(--accent); background:rgba(63,124,255,.08);
+    padding:12px 16px; border-radius:0 10px 10px 0; color:#cdd6f0; margin:12px 0}
+  .good{border-left-color:var(--accent2); background:rgba(30,215,96,.08); color:#c7f2d6}
+  .pill{display:inline-block; background:var(--chip); border:1px solid var(--line);
+    border-radius:999px; padding:2px 11px; font-size:13px; margin:3px 6px 3px 0; color:#dfe3ee}
+  footer{color:var(--muted); text-align:center; font-size:13px; margin-top:26px}
+  .print{position:fixed; right:18px; top:18px; background:var(--accent); color:#fff; border:0;
+    border-radius:10px; padding:10px 16px; font:inherit; font-weight:600; cursor:pointer;
+    box-shadow:0 8px 24px rgba(63,124,255,.4)}
+  .print:hover{background:#5590ff}
+  @media print{
+    :root{--bg:#fff; --card:#fff; --line:#d9dde7; --ink:#12141a; --muted:#6a7183; --chip:#f1f3f8}
+    body{background:#fff; color:#12141a; padding:0}
+    .print{display:none}
+    header.hero{box-shadow:none; background:#f4f6fb; color:#12141a}
+    header.hero p{color:#333}
+    section{break-inside:avoid; border-radius:10px}
+    h2 .n{background:var(--accent); color:#fff}
+    a{color:#0a58ca}
+  }
+</style>
+</head>
+<body>
+<button class="print" onclick="window.print()">Print / Save as PDF</button>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="badge">Version 1.3.0</span>
+    <h1>Floaty Mini Player</h1>
+    <p>Pop any page into a small floating window, crop just the part you need, and keep a
+       transparent music disc — or a compact music bar — on screen while you browse. Works in <strong>Chrome and Edge 116 or newer</strong>.</p>
+  </header>
+
+  <section>
+    <h2><span class="n">1</span> Install (one minute)</h2>
+    <ol>
+      <li>Unzip <code>floaty-mini.zip</code> to a folder you will keep.</li>
+      <li>Open <code>chrome://extensions</code> (or <code>edge://extensions</code>) and switch on <strong>Developer mode</strong>.</li>
+      <li>Click <strong>Load unpacked</strong> and choose the <code>floaty-mini</code> folder. Done.</li>
+    </ol>
+    <div class="note good">On first install a small <strong>welcome page</strong> opens with a single
+      <strong>Allow everything</strong> button. Everything is granted automatically at install, so the button
+      usually just confirms <em>“All set”</em>. You never have to hand-pick permissions in the extension settings.</div>
+    <p class="note">Already had it installed? Open <code>chrome://extensions</code>, click <strong>Reload</strong> on
+      Floaty, then refresh any tabs you already had open.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span> Shortcuts</h2>
+    <table>
+      <tr><th>Keys (left hand)</th><th>What happens</th></tr>
+      <tr>
+        <td class="keys"><kbd>Alt</kbd> + <kbd>1</kbd></td>
+        <td>Any website: opens the page in a small always-on-top window.<br>
+            YouTube: pops out <strong>only the video</strong>.<br>
+            Spotify / YouTube Music: shows the music disc.</td>
+      </tr>
+      <tr>
+        <td class="keys"><kbd>Alt</kbd> + <kbd>2</kbd></td>
+        <td><strong>Crop</strong>: drag a box over any part of the page. Only that part becomes the mini window.</td>
+      </tr>
+      <tr><td class="keys"><kbd>Alt</kbd> + <kbd>3</kbd></td><td>Show / hide the music <strong>disc</strong> from any tab.</td></tr>
+      <tr><td class="keys"><kbd>Alt</kbd> + <kbd>4</kbd></td><td>Show / hide the compact music <strong>bar</strong> from any tab.</td></tr>
+      <tr><td class="keys"><kbd>Alt</kbd> + <kbd>P</kbd></td><td>Pause / unpause the music. On a YouTube page it pauses / resumes the <strong>video mini player</strong>, too.</td></tr>
+      <tr><td class="keys"><kbd>Alt</kbd> + <kbd>V</kbd></td><td>Volume up (5% steps).</td></tr>
+      <tr><td class="keys"><kbd>Alt</kbd> + <kbd>B</kbd></td><td>Volume down (5% steps).</td></tr>
+    </table>
+    <p>Easy to remember: <strong>1 = Mini, 2 = Crop, 3 = Disc, 4 = Bar</strong>, the same order as the buttons.
+       Hold Alt with your thumb and tap the key.</p>
+    <p>No keyboard? Hover the <strong>right edge</strong> of any page for the <strong>Mini / Crop / Disc / Bar</strong>
+       buttons, or click the extension icon in the toolbar to reveal them. The launcher can also be <strong>dragged</strong>
+       anywhere with press-and-hold.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span> Mini window for any page</h2>
+    <ul>
+      <li>The window floats <strong>always-on-top</strong> and keeps the page fully <strong>interactive</strong> —
+          scroll, select, copy, and click inside it. <strong>Links open in a normal tab.</strong></li>
+      <li><strong>Drag it</strong> by its title bar anywhere on your screen, even outside the browser, and resize it freely.</li>
+      <li>Works for <strong>Facebook, Instagram, PDFs, and text-only / solution sites</strong>. Sites that normally
+          forbid being embedded (those that send <em>X-Frame-Options</em> or <em>Content-Security-Policy</em>) are
+          handled automatically — Floaty lifts that restriction for the mini window only, and puts it back the
+          moment you close the window.</li>
+      <li>The page itself is left <strong>untouched</strong> (the window shows its own copy), so <strong>nothing crashes</strong>
+          or lags, even on heavy sites.</li>
+      <li>If a browser refuses the always-on-top window, Floaty falls back to an <strong>in-page panel</strong> with the
+          same content, so you always get a mini view.</li>
+    </ul>
+    <h3>Crop</h3>
+    <ul>
+      <li>Press <kbd>Alt</kbd> + <kbd>2</kbd>, then <strong>drag a box</strong> over the part you want (a chat panel,
+          a paragraph, a table, a feed). Release and it opens.</li>
+      <li>Press <kbd>Enter</kbd> to open the current selection, or <kbd>Esc</kbd> to cancel.</li>
+      <li>If the always-on-top window can’t open instantly (the browser only allows it right after a click), the crop
+          stays on screen with an <strong>“Open mini player”</strong> button — click it (or press <kbd>Enter</kbd>) and it
+          opens. You never lose your selection.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">4</span> Music: the disc and the music bar (Spotify and YouTube Music)</h2>
+    <p>Open <strong>Spotify Web</strong> or <strong>YouTube Music</strong> in one tab and press play. The music UI is
+       <strong>available on every tab</strong>, but it stays hidden until you ask for it:</p>
+    <ul>
+      <li>Press <kbd>Alt</kbd> + <kbd>3</kbd> (or the <strong>Disc</strong> button) to show the <strong>disc</strong>.</li>
+      <li>Press <kbd>Alt</kbd> + <kbd>4</kbd> (or the <strong>Bar</strong> button) to show the <strong>music bar</strong>.</li>
+      <li>Press the same key again, or the little <strong>×</strong>, to hide it.</li>
+    </ul>
+    <p class="note">The music UI does <strong>not</strong> auto-open on its own.</p>
+
+    <h3>The disc</h3>
+    <table>
+      <tr><th>Part</th><th>What it does</th></tr>
+      <tr><td>Spinning disc</td><td>Shows the song’s thumbnail and spins while music plays. <strong>Drag it</strong> anywhere on the page.</td></tr>
+      <tr><td>Wave ring</td><td>Bars pulse around the disc with the music. Gaps between bars are fully see-through.</td></tr>
+      <tr><td>−5s / Play / +5s</td><td>Jump back, pause or resume, jump forward. Controls the music tab even if you are on another tab.</td></tr>
+      <tr><td>Progress bar</td><td>Shows how far into the song you are, with the time. <strong>Click or drag</strong> it to seek.</td></tr>
+      <tr><td>Colour</td><td>Disc, wave and buttons take the colour of the current thumbnail. Tuned to stay readable on any background.</td></tr>
+      <tr><td>Background buttons</td><td>Three looks for the backdrop:<br>
+          <span class="pill">🌙 Dark</span> <span class="pill">☁ Transparent</span> <span class="pill">☀ White</span></td></tr>
+      <tr><td>Mouse wheel</td><td>Scroll over the disc to make it bigger or smaller.</td></tr>
+      <tr><td>▤ button</td><td>Switches to the music <strong>bar</strong>.</td></tr>
+      <tr><td>× button</td><td>Hides it. Press <kbd>Alt</kbd> + <kbd>3</kbd> to bring it back.</td></tr>
+    </table>
+
+    <h3>The music bar</h3>
+    <p>A slim, horizontal player — handy when you want the controls without covering the page:</p>
+    <ul>
+      <li>Thumbnail, song title and artist on the left.</li>
+      <li>A <strong>progress bar</strong> with the current / total time; <strong>click or drag</strong> it to seek.</li>
+      <li><strong>−5s / Play / +5s</strong> buttons, the same <strong>dark / transparent / white</strong> background
+          buttons, a <strong>◉</strong> button back to the disc, and an <strong>×</strong> to hide it.</li>
+      <li>Its own little <strong>wave</strong> bars that dance with the music.</li>
+      <li><strong>Drag it</strong> anywhere and use the <strong>mouse wheel</strong> to resize.</li>
+    </ul>
+    <p>Both the disc and the bar share the same colour and the same background choice.</p>
+
+    <h3>Real, song-driven waves</h3>
+    <p>The waves move with the <strong>actual music and voices</strong>, not a random animation:</p>
+    <ul>
+      <li><strong>YouTube Music</strong> — analysed directly from the audio.</li>
+      <li><strong>Spotify</strong> (and other protected players) — Floaty captures the tab’s <strong>real audio</strong>
+          in the background just for the visualiser (the sound keeps playing normally), then releases it the moment you
+          pause or hide the player. If the browser won’t allow the capture, Floaty quietly falls back to a gentle animation.</li>
+    </ul>
+
+    <h3>Auto ad-skip</h3>
+    <p>On <strong>YouTube</strong> and <strong>YouTube Music</strong>, ads are skipped automatically: Floaty clicks the
+       <em>Skip</em> button as soon as it appears, and for un-skippable ads it silently mutes and runs past them, then
+       restores your sound. Listen without interruption.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">5</span> YouTube</h2>
+    <p>On a normal YouTube page, <kbd>Alt</kbd> + <kbd>1</kbd> and <kbd>Alt</kbd> + <kbd>2</kbd> both pop out
+       <strong>only the video</strong> (the browser’s native mini player) — never the whole page. Floaty deliberately
+       does <strong>not</strong> rearrange YouTube’s page, so it can’t crash or lag it.</p>
+    <div class="note good">The popped-out video also gets its own small <strong>play/pause button</strong> in the
+       corner, and you can always press <kbd>Alt</kbd> + <kbd>P</kbd> on the YouTube tab to pause / resume it.
+       (<kbd>Alt</kbd> + <kbd>V</kbd> / <kbd>B</kbd> change its volume too.)</div>
+  </section>
+
+  <section>
+    <h2><span class="n">6</span> What’s new in 1.3.0</h2>
+    <ul>
+      <li><strong>Much lighter on your computer.</strong> Floaty now builds its window, waves and music UI
+          <strong>only when you actually use them</strong> in a tab. Tabs where you never open Floaty cost almost
+          nothing — no canvases, no timers, no background chatter. The big win for low-end PCs and many open tabs.</li>
+      <li><strong>Automatic “lite mode”</strong> on low-memory / low-core machines: fewer wave bars, a smaller drawing
+          surface, no glow — same features, gentler on the CPU.</li>
+      <li><strong>The player stops drawing when paused</strong> — no wasted frames when nothing is moving.</li>
+      <li><strong>YouTube pause fixed</strong> — the video mini player now has its own <strong>play/pause</strong> button,
+          and <kbd>Alt</kbd> + <kbd>P</kbd> pauses / resumes the popped-out video.</li>
+      <li><strong>Gentler startup</strong> — when the extension updates, it attaches to your open tabs in small steps
+          instead of all at once.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">7</span> What’s new in 1.2.0</h2>
+    <ul>
+      <li><strong>New music bar</strong> (<kbd>Alt</kbd>+<kbd>4</kbd>): a slim horizontal player with thumbnail,
+          title/artist, a progress bar, the −5s / play / +5s buttons, background buttons, its own wave, and a close
+          button. Drag it anywhere, wheel-resize it.</li>
+      <li><strong>Progress + seek</strong> on both the disc and the bar — click or drag to jump around the song.</li>
+      <li><strong>The waves follow the real music</strong> now, even on Spotify: Floaty captures the tab’s real audio
+          (sound keeps playing) so the bars move with the music and voices, not a random animation.</li>
+      <li><strong>Auto ad-skip</strong> on YouTube and YouTube Music — ads are skipped, un-skippable ads are muted and run
+          past, then your sound returns.</li>
+      <li><strong>The × close button is fixed and always visible</strong> — it can no longer be covered by the wave.</li>
+      <li><strong>Background buttons on the music bar too</strong> — dark / transparent / white, shared with the disc.</li>
+      <li><strong>Draggable launcher</strong> — move the Mini / Crop / Disc / Bar buttons anywhere.</li>
+      <li><strong>Alt + 4</strong> added alongside Alt + 1 / 2 / 3, and <kbd>Alt</kbd>+<kbd>P</kbd> / <kbd>V</kbd> / <kbd>B</kbd>.</li>
+      <li><strong>Reloading the extension now updates open tabs instantly</strong> — no more “it looks the same as
+          before”; the new version replaces the old one in place.</li>
+      <li>Everything from 1.1.0 remains: cropping on any site, video-only YouTube, no auto-opening disc,
+          drag-everywhere mini windows, and one-button permissions.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">8</span> Good to know</h2>
+    <ul>
+      <li>The transparent disc lives <strong>inside the browser</strong>. Browsers cannot draw transparent windows over
+          other apps, so it will <strong>not</strong> float above your desktop.</li>
+      <li><strong>Floaty stays light.</strong> It only creates its UI in a tab once you use it there, and it stops
+          animating when the music is paused. On low-end machines it switches to <strong>lite mode</strong> by itself —
+          same features, smaller waves, less CPU. Nothing to configure.</li>
+      <li>The always-on-top mini window is a real browser window, so it is dragged by its <strong>title bar</strong>
+          (the browser does not let a page move it). The disc, the music bar, the launcher and the in-page panel drag by
+          clicking and holding anywhere on them.</li>
+      <li>The waves follow the <strong>real audio</strong>. For Spotify, Floaty asks the browser to share the tab’s audio
+          with the visualiser; Chrome may show a small <em>“sharing this tab”</em> indicator while it is listening. It stops
+          as soon as you pause or hide the player, and your sound is never muted.</li>
+      <li>Spotify’s <strong>−5s / +5s</strong> is best effort and may need an update if Spotify changes its website.</li>
+      <li>Crop <strong>one specific area</strong> (a post, a panel, a table) for best results. Very large areas may look
+          different in a narrow window.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">9</span> Troubleshooting</h2>
+    <ul>
+      <li><strong>Shortcuts do nothing?</strong> Reload the tab, then <strong>click the extension icon</strong> in the
+          toolbar: you should see <em>Floaty is active</em>. Floaty attaches itself to tabs you already had open, so a
+          reload is rarely needed. Reloading the extension also swaps the new version into open tabs automatically.</li>
+      <li><strong>Updated but it looks the same?</strong> Chrome keeps older copies of the script in tabs that were
+          already open. Just <strong>click the extension icon</strong> once on that tab (or refresh the page) and the new
+          version takes over — no full browser restart.</li>
+      <li><strong>Mini window looks blank or won’t embed?</strong> Give it a second — Floaty tries three ways in turn
+          (always-on-top window → live view → in-page panel). On very unusual sites only the panel is available.</li>
+      <li><strong>Music UI is missing?</strong> Make sure Spotify / YouTube Music is actually <strong>playing</strong>,
+          then press <kbd>Alt</kbd> + <kbd>3</kbd> (disc) or <kbd>Alt</kbd> + <kbd>4</kbd> (bar). It is hidden by default
+          on purpose.</li>
+      <li><strong>The wave isn’t moving with the music?</strong> For Spotify the browser has to allow tab-audio sharing.
+          If it was blocked, Floaty falls back to a gentle animation. Showing the player right after the music starts
+          usually fixes it.</li>
+      <li><strong>A red badge on the icon</strong> means the page blocks all extensions — browser pages like
+          <code>chrome://</code>, <code>edge://</code>, the Web Store, or the built-in PDF viewer. Use a normal website,
+          or the hover buttons on the right edge.</li>
+      <li><strong>Nothing floats above other apps</strong> (games, Explorer, etc.) — that’s a browser limitation, not a
+          bug. The disc and windows stay inside Chrome / Edge.</li>
+    </ul>
+  </section>
+
+  <footer>Floaty Mini Player 1.3.0 · Works in Chrome / Edge 116+</footer>
+</div>
+</body>
+</html>
