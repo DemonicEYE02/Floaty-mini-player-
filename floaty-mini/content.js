@@ -3,9 +3,17 @@
   // after the extension is reloaded without refreshing the tab), tear it down so the new UI
   // takes over. Without this, an old script would keep running and everything would look
   // "the same as before" until you manually refreshed the page.
+  const MY_GEN = (window.__floatyGen || 0) + 1;
+  window.__floatyGen = MY_GEN;
   try { if (window.__floaty && typeof window.__floaty.destroy === 'function') window.__floaty.destroy(); } catch (e) {}
   try { document.querySelectorAll('[data-floaty-host]').forEach((n) => n.remove()); } catch (e) {}
   if (!chrome.runtime || !chrome.runtime.id) return;
+  // Shared, always-initialised handles. Declared up here (not further down) so the exposed
+  // destroy() can always reach them, even if this copy is torn down mid-boot.
+  var hostEl = null, toastT = 0, dropT = 0, watchT = 0, port = null, running = false,
+      srcLoop = false, activePip = null, activeRestore = null, adTimer = 0, cancelCrop = null, mediaPlayFn = null;
+
+  const VERSION = '1.3.1';
 
   /* ───────────────────────────────────────────────────────────────────────────
      LIGHTWEIGHT BY DESIGN
@@ -32,6 +40,10 @@
 
   const BANDS = 24;
   let alive = true;
+  // A newer copy of Floaty running in the same page supersedes this one. Every timer, loop and
+  // listener checks this, so a stale instance can never keep drawing, hold a port open, or fight
+  // the fresh UI — that is what used to leave a "glitchy" disc/bar behind until a manual refresh.
+  const ok = () => alive && window.__floatyGen === MY_GEN;
 
   /* ───────── page helpers ───────── */
   function setCss(el, o) { for (const k in o) { try { el.style[k] = o[k]; } catch (e) {} } }
@@ -209,7 +221,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
 
   /* ───────── mount the tiny shell (only this is created eagerly) ───────── */
-  const hostEl = document.createElement('div');
+  hostEl = document.createElement('div');
   try { hostEl.setAttribute('data-floaty-host', '1'); } catch (e) {}
   const root = hostEl.attachShadow({ mode: 'open' });
   root.innerHTML = SHELL_HTML;
@@ -219,8 +231,11 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   document.documentElement.appendChild(hostEl);
   const $ = (id) => root.getElementById(id);
 
+  // Expose the teardown handle the instant the shell exists — before any heavy work — so a
+  // re-injected copy can always clean this instance up (no duplicated/ghost UI after a reload).
+  try { window.__floaty = { version: VERSION, destroy }; } catch (e) {}
+
   const launcher = $('launcher');
-  let toastT;
   function toast(msg) {
     const t = $('toast');
     if (!t) return;
@@ -234,7 +249,6 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   const el = {};                 // filled by ensureUI()
   let uiBuilt = false;
   let musicSheet = null;
-  let running = false;
   let lastProg = 0;
   const st = {
     track: null, hsl: { h: 140, s: 0.8, l: 0.68 }, ink: '#1ed760', playing: false,
@@ -297,22 +311,31 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   }
 
   /* ───────── port (lazily connected; dropped when nothing needs it) ───────── */
-  let port = null, dropT = 0, retryT = 0;
   function send(m) { try { if (port) port.postMessage(m); } catch (e) {} }
   function ensurePort() {
-    if (port || !chrome.runtime || !chrome.runtime.id) return port;
+    if (port) return port;
+    if (!chrome.runtime || !chrome.runtime.id) { watchdog(); return null; }
     try {
       port = chrome.runtime.connect({ name: 'floaty' });
       port.onMessage.addListener(onMsg);
-      port.onDisconnect.addListener(() => {
-        port = null;
-        // Reconnect quietly if we still need live music (handles extension reloads / SW restarts).
-        const need = st.armed || srcPlaying || (IS_SOURCE && st.track);
-        if (alive && need) { clearTimeout(retryT); retryT = setTimeout(() => { if (alive && (st.armed || srcPlaying || (IS_SOURCE && st.track))) ensurePort(); }, 1500); }
-      });
+      port.onDisconnect.addListener(() => { port = null; watchdog(); });
       if (IS_SOURCE && curTrack) send(curTrack);
-    } catch (e) { port = null; }
+    } catch (e) { port = null; watchdog(); }
     return port;
+  }
+  // Keeps the disc/bar alive through service-worker restarts (MV3 kills the worker when idle),
+  // and tears the page down if the extension itself was reloaded/disabled — so you never have to
+  // refresh a tab by hand and a dead context can't leave a frozen disc/bar behind.
+  function watchdog() {
+    if (watchT || !ok()) return;
+    watchT = setTimeout(() => {
+      watchT = 0;
+      if (!ok()) return;
+      if (!chrome.runtime || !chrome.runtime.id) { destroy(); return; }
+      const need = st.armed || srcPlaying || (IS_SOURCE && st.track);
+      if (need && !port) { ensurePort(); if (!port) watchdog(); }
+      else if (!need) maybeDropPort();
+    }, 1500);
   }
   function maybeDropPort() {
     if (!port || dropT) return;
@@ -321,7 +344,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
       // Keep the port while a music tab still has a track loaded (even if paused), so the
       // disc/bar in other tabs don't lose the song just because playback was paused.
       const keepForSource = IS_SOURCE && st.track;
-      if (port && !st.armed && !srcPlaying && !keepForSource) { try { port.disconnect(); } catch (e) {} port = null; }
+      if (ok() && port && !st.armed && !srcPlaying && !keepForSource) { try { port.disconnect(); } catch (e) {} port = null; }
     }, 8000);
   }
 
@@ -366,13 +389,16 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
       kick();
     }
   }
-  function setMusicVisible(v, mode) {
+  function setMusicVisible(v, mode, silent) {
     if (mode) st.mode = mode;
     st.armed = !!v;
+    // Remember the choice so the disc/bar follow you to every other page and tab, and reappear
+    // automatically. Closing it with × turns it off everywhere again.
+    try { chrome.storage.local.set({ fl_on: st.armed, fl_mode: st.mode }); } catch (e) {}
     if (st.armed) { ensureUI(); ensurePort(); }
     refresh();
     if (!st.armed) maybeDropPort();
-    if (st.armed && !st.track) toast('Play something on Spotify or YouTube Music to fill the ' + (st.mode === 'bar' ? 'bar' : 'disc'));
+    if (st.armed && !st.track && !silent) toast('Play something on Spotify or YouTube Music to fill the ' + (st.mode === 'bar' ? 'bar' : 'disc'));
   }
   function toggleDisc() { setMusicVisible(!(st.armed && st.mode === 'disc'), 'disc'); }
   function toggleBar() { setMusicVisible(!(st.armed && st.mode === 'bar'), 'bar'); }
@@ -449,7 +475,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     }
   }
   function drawLoop() {
-    if (!alive || !st.armed) { running = false; return; }
+    if (!ok() || !st.armed) { running = false; return; }
     const d = st.disp;
     for (let i = 0; i < BANDS; i++) d[i] += ((st.levels[i] || 0) - d[i]) * 0.4;
     if (st.mode === 'disc') drawRing(); else drawBars();
@@ -457,7 +483,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     if (!moving) { for (let i = 0; i < BANDS; i++) if (d[i] > 0.03) { moving = true; break; } }
     if (moving) requestAnimationFrame(drawLoop); else running = false;  // stop when idle: no CPU burn on a paused player
   }
-  function kick() { if (alive && st.armed && !running && uiBuilt) { running = true; requestAnimationFrame(drawLoop); } }
+  function kick() { if (ok() && st.armed && !running && uiBuilt) { running = true; requestAnimationFrame(drawLoop); } }
 
   /* ───────── wiring for the music UI ───────── */
   function wireSeek(trackEl) {
@@ -725,8 +751,12 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     try { pip = await documentPictureInPicture.requestWindow({ width: w, height: h }); }
     catch (e) { return 'activation'; }
     if (!pip || pip.closed) return 'closed';
+    activePip = pip;
     let restore = () => {};
-    pip.addEventListener('pagehide', () => { try { restore(); } catch (e) {} freeAllow(); });
+    pip.addEventListener('pagehide', () => {
+      try { restore(); } catch (e) {}
+      activeRestore = null; activePip = null; freeAllow();
+    });
     try {
       const d = pip.document;
       d.title = document.title;
@@ -749,6 +779,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
         built.wrap.remove();
         const mv = buildMove(d, rect);
         restore = mv.restore;
+        activeRestore = mv.restore;
         d.body.appendChild(mv.wrap);
         freeAllow();
       } else if (!rect) {
@@ -757,6 +788,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     } catch (e) {
       if (pip.closed) { freeAllow(); return 'closed'; }
       console.error('[Floaty]', e);
+      activeRestore = null; activePip = null;
       try { restore(); pip.close(); } catch (e2) {}
       freeAllow();
       toast('Mini window failed: ' + (e && e.message ? e.message : 'unknown error'));
@@ -829,10 +861,12 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     let x0 = 0, y0 = 0, rect = null, dragging = false;
     const end = () => {
       cropping = false;
+      cancelCrop = null;
       ov.style.display = 'none'; openB.style.display = 'none'; sel.style.display = 'none';
       ov.onpointerdown = ov.onpointermove = ov.onpointerup = null;
       window.removeEventListener('keydown', onKey, true);
     };
+    cancelCrop = end;
     const showOpen = () => {
       if (!rect) return;
       openB.style.display = 'block';
@@ -906,6 +940,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
 
   /* ───────── keyboard: Alt+1/2/3/4, Alt+P, Alt+V, Alt+B ───────── */
   function onGlobalKey(e) {
+    if (!ok()) return;
     if (!e.altKey || e.ctrlKey || e.metaKey) return;
     const code = e.code || '';
     let n = 0;
@@ -936,6 +971,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   window.addEventListener('keydown', onGlobalKey, true);
 
   chrome.runtime.onMessage.addListener((m) => {
+    if (!ok()) return;
     if (m.type === 'showLauncher') {
       launcher.classList.add('show');
       toast('Floaty is active. Alt+1 Mini · Alt+2 Crop · Alt+3 Disc · Alt+4 Bar · Alt+P pause · Alt+V/B volume');
@@ -959,7 +995,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   }
 
   /* ───────── music source (Spotify / YouTube Music tab) ───────── */
-  let srcPlaying = false, srcVol = 1, srcLoop = false, srcIdle = 0, lastTrackCheck = 0, capOn = false, capRetry = 0;
+  let srcPlaying = false, srcVol = 1, srcIdle = 0, lastTrackCheck = 0, capOn = false, capRetry = 0;
   const refCache = { t: 0, video: null, pos: null, dur: null, play: null, bar: null };
 
   const parseT = (t) => { const p = (t || '').trim().split(':').map(Number); return p.some(isNaN) ? 0 : p.reduce((a, b) => a * 60 + b, 0); };
@@ -1101,7 +1137,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   }
 
   function sourceLoop() {
-    if (!alive || !srcLoop) return;
+    if (!ok() || !srcLoop) return;
     const now = performance.now();
     const s = readState();
     srcPlaying = s.playing;
@@ -1190,10 +1226,10 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
   /* ───────── auto ad-skip (YouTube + YouTube Music) ───────── */
   function startAdSkip() {
     if (!(IS_YT || IS_YTM)) return;
-    let muted = false, t = 0;
+    let muted = false;
     const skipSel = '.ytp-ad-skip-button-modern,.ytp-ad-skip-button,.ytp-skip-ad-button,.ytp-ad-skip-button-slot button,.ytmusic-player-bar .ytp-ad-skip-button,button[class*="skip-ad"]';
     const tickAd = () => {
-      if (!alive) return;
+      if (!ok()) return;
       try {
         const ad = q('.ad-showing') || q('.ytp-ad-player-overlay') || q('ytmusic-player-bar .ad-showing');
         if (ad) {
@@ -1206,7 +1242,7 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
           }
         } else if (muted) { const v = q('video'); if (v) { v.muted = false; } muted = false; }
       } catch (e) {}
-      t = setTimeout(tickAd, LITE ? 1200 : 900);
+      adTimer = setTimeout(tickAd, LITE ? 1200 : 900);
     };
     tickAd();
   }
@@ -1220,15 +1256,28 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     try { window.removeEventListener('keydown', onGlobalKey, true); } catch (e) {}
     try { if (toastT) clearTimeout(toastT); } catch (e) {}
     try { if (dropT) clearTimeout(dropT); } catch (e) {}
-    try { if (retryT) clearTimeout(retryT); } catch (e) {}
+    try { if (watchT) clearTimeout(watchT); } catch (e) {}
+    try { if (adTimer) clearTimeout(adTimer); } catch (e) {}
+    try { if (cancelCrop) cancelCrop(); } catch (e) {}
+    try { if (mediaPlayFn) { document.removeEventListener('play', mediaPlayFn, true); document.removeEventListener('playing', mediaPlayFn, true); } } catch (e) {}
+    // Put any moved-DOM mini window back where it came from, and close windows we opened —
+    // without this the page could be left looking broken after the extension reloads.
+    try { if (activeRestore) activeRestore(); } catch (e) {}
+    activeRestore = null;
+    try { if (activePip && !activePip.closed) activePip.close(); } catch (e) {}
+    activePip = null;
     try { if (port) port.disconnect(); } catch (e) {}
+    port = null;
     try { chrome.runtime.sendMessage({ type: 'cap', on: false }); } catch (e) {}
     try { freeAllow(); } catch (e) {}
+    try { if (el.panel) el.panel.style.display = 'none'; } catch (e) {}
+    try { if (el.pbody) el.pbody.textContent = ''; } catch (e) {}
     try { hostEl.remove(); } catch (e) {}
   }
 
   /* ───────── boot (cheap) ───────── */
-  chrome.storage.local.get(['fl_x', 'fl_y', 'fl_scale', 'fl_bg', 'fl_mode', 'fl_bx', 'fl_by', 'fl_lx', 'fl_ly'], (v) => {
+  chrome.storage.local.get(['fl_x', 'fl_y', 'fl_scale', 'fl_bg', 'fl_mode', 'fl_on', 'fl_bx', 'fl_by', 'fl_lx', 'fl_ly'], (v) => {
+    if (!ok()) return;
     if (v.fl_x != null) { st.x = v.fl_x; st.y = v.fl_y; }
     if (v.fl_bx != null) { st.bx = v.fl_bx; st.by = v.fl_by; }
     if (v.fl_scale) st.scale = v.fl_scale;
@@ -1239,8 +1288,11 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
       setCss(launcher, { left: v.fl_lx + 'px', top: v.fl_ly + 'px', right: 'auto' });
     }
     if (uiBuilt) { applyBg(); refresh(); }
+    // Follow the user: if the disc/bar were left on, bring them back on this page too.
+    if (v.fl_on) setMusicVisible(true, v.fl_mode || 'disc', true);
   });
   chrome.storage.onChanged.addListener((c) => {
+    if (!ok()) return;
     if (c.fl_x) st.x = c.fl_x.newValue;
     if (c.fl_y) st.y = c.fl_y.newValue;
     if (c.fl_bx) st.bx = c.fl_bx.newValue;
@@ -1248,19 +1300,26 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     if (c.fl_scale) st.scale = c.fl_scale.newValue;
     if (c.fl_bg) { st.bg = c.fl_bg.newValue; if (uiBuilt) applyBg(); }
     if (c.fl_mode) st.mode = c.fl_mode.newValue;
+    // Show/hide on every page the instant it is toggled in any single tab.
+    if (c.fl_on && (!!c.fl_on.newValue) !== st.armed) {
+      st.armed = !!c.fl_on.newValue;
+      if (st.armed) { ensureUI(); ensurePort(); }
+      refresh();
+      if (!st.armed) maybeDropPort();
+    }
     if (uiBuilt && st.armed) refresh();
   });
-  window.addEventListener('resize', () => { if (uiBuilt && st.armed) { place(); placeBar(); } });
+  window.addEventListener('resize', () => { if (ok() && uiBuilt && st.armed) { place(); placeBar(); } });
   window.addEventListener('pagehide', () => { if (capOn) { try { chrome.runtime.sendMessage({ type: 'cap', on: false }); } catch (e) {} } });
 
   if (IS_SOURCE) {
     // Only music tabs poll, and only while something is actually playing.
-    const mediaPlay = (ev) => { const t = ev.target; if (t && (t.tagName === 'VIDEO' || t.tagName === 'AUDIO')) { ensurePort(); startSource(); } };
-    document.addEventListener('play', mediaPlay, true);
-    document.addEventListener('playing', mediaPlay, true);
-    setTimeout(() => { if (alive) { ensurePort(); startSource(); } }, 0);
+    mediaPlayFn = (ev) => { const t = ev.target; if (t && (t.tagName === 'VIDEO' || t.tagName === 'AUDIO')) { ensurePort(); startSource(); } };
+    document.addEventListener('play', mediaPlayFn, true);
+    document.addEventListener('playing', mediaPlayFn, true);
+    setTimeout(() => { if (ok()) { ensurePort(); startSource(); } }, 0);
   }
 
   console.log('[Floaty] ready on', location.href, LITE ? '(lite mode)' : '');
-  window.__floaty = { version: '1.3.0', destroy };
+  window.__floaty = { version: VERSION, destroy };
 })();

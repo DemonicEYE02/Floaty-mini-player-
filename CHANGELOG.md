@@ -5,6 +5,32 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.1] — 2026-10-17
+
+### ✨ Added
+- **The music disc and bar now follow you.** Turning the player on once remembers the choice,
+  and it reappears automatically on every other page and tab you open — in the look (disc/bar,
+  background) you picked — until you close it with the **×**. Closing it turns it off everywhere.
+- **Cross-tab sync.** Toggling the disc/bar in one tab shows or hides it in every other tab
+  immediately.
+- **Instant fill-in.** A tab that turns the player on now receives the current track, progress
+  and wave levels straight away instead of waiting for the next source update.
+
+### 🩹 Fixed
+- **No more manual refreshes.** After the extension is updated or reloaded, open tabs are swapped
+  to the new version automatically. A new global *generation* counter means any older copy of the
+  script stops drawing, stops holding a port and is torn down the moment the new one boots — even
+  if the old copy had not finished starting. This removes the duplicate/ghost UI that previously
+  required a page refresh.
+- **No more "stuck" disc or bar.** The teardown now closes any pop-out window it opened, restores
+  a moved-DOM mini window, cancels an in-progress crop, clears every timer and removes the
+  floating host — so nothing is left frozen or glitching on the page.
+- **Self-healing connection.** A watchdog reconnects the player if the background service worker
+  is parked (normal MV3 behaviour), and if the extension is reloaded or disabled it removes the
+  on-page UI by itself — again, no manual refresh needed.
+
+---
+
 ## [1.3.0] — 2026-10-17
 
 ### ⚡ Performance & memory

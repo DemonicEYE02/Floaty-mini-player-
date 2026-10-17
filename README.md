@@ -6,11 +6,11 @@
 
 A lightweight Manifest V3 extension for **Google Chrome** and **Microsoft Edge**.
 
-![version](https://img.shields.io/badge/version-1.3.0-2f6df6?style=flat-square)
+![version](https://img.shields.io/badge/version-1.3.1-2f6df6?style=flat-square)
 ![platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Edge-1ed760?style=flat-square)
 ![manifest](https://img.shields.io/badge/manifest-v3-ff8a3d?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
-![size](https://img.shields.io/badge/size-%7E79%20KB-8a8a99?style=flat-square)
+![size](https://img.shields.io/badge/size-%7E81%20KB-8a8a99?style=flat-square)
 
 </div>
 
@@ -21,7 +21,7 @@ A lightweight Manifest V3 extension for **Google Chrome** and **Microsoft Edge**
 Floaty is a small, fast browser extension that gives you three things no built-in browser feature does well:
 
 1. **A mini window for *any* page** — pop a page into an always-on-top window you can scroll, click, copy and navigate, or **crop** just one section (a chat panel, a table, a paragraph, a PDF region) into its own little window.
-2. **A music disc & music bar** for **Spotify Web** and **YouTube Music** — a draggable, thumbnail-coloured disc (or a slim horizontal bar) with playback controls, a seek bar and a visualiser who waves follow the **real audio**.
+2. **A music disc & music bar** for **Spotify Web** and **YouTube Music** — a draggable, thumbnail-coloured disc (or a slim horizontal bar) with playback controls, a seek bar and a visualiser whose waves follow the **real audio**. Switch it on once and it **follows you** to every other page and tab until you close it.
 3. **Hands-off quality-of-life** — video-only mini player on YouTube, **automatic ad-skipping**, and one-button setup with no permission hunting.
 
 It is designed to be **extremely light**: the interface is only created in a tab **when you actually use it**, so idle tabs cost almost nothing. On low-end machines it automatically switches to a **lite mode** (fewer visualiser bars, smaller drawing surface, no glow) — same features, less CPU.
@@ -39,6 +39,8 @@ It is designed to be **extremely light**: the interface is only created in a tab
 | **Real audio waves** | YouTube Music is analysed directly; Spotify's tab audio is captured in the background for the visualiser only (sound keeps playing). |
 | **Auto ad-skip** | YouTube & YouTube Music ads are skipped, or muted-and-run-past, automatically. |
 | **Backgrounds** | 🌙 Dark · ☁ Transparent · ☀ White — applied to the disc *and* the bar. |
+| **Follows you** | Turn the player on once and it appears on every page and tab, in your chosen look, until you close it. |
+| **Self-updating** | Update or reload the extension and your open tabs swap over automatically — no page refresh, no ghost UI. |
 | **Lightweight** | Lazy UI, lite mode on low-end PCs, drawing stops when paused. |
 
 ---
@@ -54,7 +56,7 @@ It is designed to be **extremely light**: the interface is only created in a tab
 3. Click **Load unpacked** and select the **`floaty-mini`** folder.
 4. That's it — a one-time welcome page opens with a single **Allow everything** button. Permissions are granted automatically at install; you never hand-pick anything.
 
-*Already installed?* Open `chrome://extensions`, click **Reload** on Floaty, then click the toolbar icon once on any tab you already had open (or refresh the page).
+*Already installed?* Open `chrome://extensions` and click **Reload** on Floaty. The new version replaces the old one in your open tabs by itself, so you normally don't have to refresh anything.
 
 ### Option B — From `files.zip`
 
@@ -119,6 +121,7 @@ Floaty asks for exactly what it uses. Nothing is sent to any server; there is no
 - **Music** — a tiny content-script "source" on the Spotify / YouTube Music tab reports the current track, colour (extracted from the artwork) and playback state over a long-lived message port; any other tab can render the disc/bar. Control commands are relayed back to the source tab.
 - **Visualiser** — YouTube Music is analysed directly with the Web Audio API. Spotify's protected audio is captured via `tabCapture` → an offscreen document → an `AnalyserNode`, and routed back to the speakers so **you never lose sound**.
 - **Lightweight by design** — the shadow-DOM UI, canvases, timers and message port are created **lazily**, only when you first use Floaty in a tab. Idle tabs keep just a tiny launcher.
+- **Follows you & self-heals** — your disc/bar choice is remembered in `chrome.storage`, so the player reappears on every page and tab you open. Each page instance is guarded by a **generation counter** (a freshly injected copy always tears the old one down) plus a **watchdog** that reconnects after the MV3 worker sleeps, and removes the on-page UI cleanly if the extension is reloaded — no manual refresh, no stuck or duplicated disc.
 
 ---
 
@@ -149,6 +152,12 @@ Floaty asks for exactly what it uses. Nothing is sent to any server; there is no
 
 See [CHANGELOG.md](CHANGELOG.md). Latest:
 
+**1.3.1**
+- 🧲 **The disc and bar follow you** — turn the player on once and it reappears on every page and tab, in your chosen look, until you close it. Toggling it syncs across tabs instantly.
+- ♻️ **No more manual refreshes** — updating/reloading the extension swaps open tabs over automatically, and old copies are always torn down (no ghost or duplicated disc).
+- 🧹 **No more stuck player** — teardown closes pop-outs, restores the page and cancels a crop; a watchdog reconnects after the browser parks the worker.
+- ⏱️ A newly opened tab shows the **current song, progress and waves** immediately.
+
 **1.3.0**
 - ⚡ **Much lighter** — UI/canvases/timers/port are now created lazily, only when used in a tab.
 - 🪶 **Automatic lite mode** on low-end machines.
@@ -161,9 +170,9 @@ See [CHANGELOG.md](CHANGELOG.md). Latest:
 
 ## 🩹 Troubleshooting
 
-- **Shortcuts do nothing?** Click the extension icon once on the tab (or refresh). Floaty attaches to already-open tabs too.
-- **Updated but it looks the same?** Chrome keeps old script copies in open tabs — click the toolbar icon once, or refresh.
-- **Music UI missing?** Make sure Spotify / YouTube Music is **playing**, then press **Alt + 3** (disc) or **Alt + 4** (bar). It's hidden by default on purpose.
+- **Shortcuts do nothing?** Click the extension icon once on the tab. Floaty also attaches to already-open tabs on its own.
+- **Updated but it looks the same?** Open tabs now swap to the new version automatically. If a tab ever seems stale, click the toolbar icon once there — no refresh or restart needed.
+- **Music UI missing?** Make sure Spotify / YouTube Music is **playing**, then press **Alt + 3** (disc) or **Alt + 4** (bar). Once on, it stays on and follows you everywhere; close it with the **×** to turn it off.
 - **Wave not moving?** On Spotify the browser must allow tab-audio sharing; if blocked, Floaty falls back to a gentle animation.
 - **Red badge on the icon?** The page blocks extensions (`chrome://`, `edge://`, the Web Store, the built-in PDF viewer). Use a normal website.
 - **Nothing floats above other apps?** Browsers can't draw over other applications — the disc, bar and windows stay inside Chrome / Edge.

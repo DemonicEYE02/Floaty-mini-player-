@@ -6,6 +6,7 @@
 
 const ports = new Set();
 let sourcePort = null; // the tab currently playing music
+let lastTick = null;   // most recent playback tick, replayed to tabs that join later
 let nextRule = 100;
 
 function broadcast(m) {
@@ -52,6 +53,8 @@ chrome.runtime.onConnect.addListener((port) => {
   ports.add(port);
   port.track = null;
   if (sourcePort && sourcePort.track) port.postMessage(sourcePort.track);
+  // Give a page that just turned the disc/bar on the current progress + waves right away.
+  if (lastTick && Date.now() - lastTick.at < 4000) port.postMessage(lastTick);
 
   port.onMessage.addListener((m) => {
     if (m.type === 'track') {
@@ -65,6 +68,7 @@ chrome.runtime.onConnect.addListener((port) => {
         broadcast(port.track);
       }
       if (captureLevels && m.playing) m.levels = captureLevels; // real audio wins over the simulated wave
+      lastTick = { ...m, at: Date.now() };
       broadcast(m);
     } else if (m.type === 'cmd') {
       if (sourcePort) { try { sourcePort.postMessage(m); } catch (e) {} }
@@ -78,6 +82,7 @@ chrome.runtime.onConnect.addListener((port) => {
     ports.delete(port);
     if (port === sourcePort) {
       sourcePort = null;
+      lastTick = null;
       broadcast({ type: 'gone' });
     }
   });

@@ -72,7 +72,7 @@
 <div class="wrap">
 
   <header class="hero">
-    <span class="badge">Version 1.3.0</span>
+    <span class="badge">Version 1.3.1</span>
     <h1>Floaty Mini Player</h1>
     <p>Pop any page into a small floating window, crop just the part you need, and keep a
        transparent music disc — or a compact music bar — on screen while you browse. Works in <strong>Chrome and Edge 116 or newer</strong>.</p>
@@ -88,8 +88,9 @@
     <div class="note good">On first install a small <strong>welcome page</strong> opens with a single
       <strong>Allow everything</strong> button. Everything is granted automatically at install, so the button
       usually just confirms <em>“All set”</em>. You never have to hand-pick permissions in the extension settings.</div>
-    <p class="note">Already had it installed? Open <code>chrome://extensions</code>, click <strong>Reload</strong> on
-      Floaty, then refresh any tabs you already had open.</p>
+    <p class="note">Already had it installed? Open <code>chrome://extensions</code> and click <strong>Reload</strong> on
+      Floaty. The new version replaces the old one in your open tabs by itself — you normally do <strong>not</strong>
+      have to refresh anything.</p>
   </section>
 
   <section>
@@ -147,14 +148,17 @@
 
   <section>
     <h2><span class="n">4</span> Music: the disc and the music bar (Spotify and YouTube Music)</h2>
-    <p>Open <strong>Spotify Web</strong> or <strong>YouTube Music</strong> in one tab and press play. The music UI is
-       <strong>available on every tab</strong>, but it stays hidden until you ask for it:</p>
+    <p>Open <strong>Spotify Web</strong> or <strong>YouTube Music</strong> in one tab and press play. The music UI works from
+       <strong>any tab</strong> — the one playing the music, or any other page you happen to be on:</p>
     <ul>
       <li>Press <kbd>Alt</kbd> + <kbd>3</kbd> (or the <strong>Disc</strong> button) to show the <strong>disc</strong>.</li>
       <li>Press <kbd>Alt</kbd> + <kbd>4</kbd> (or the <strong>Bar</strong> button) to show the <strong>music bar</strong>.</li>
       <li>Press the same key again, or the little <strong>×</strong>, to hide it.</li>
     </ul>
-    <p class="note">The music UI does <strong>not</strong> auto-open on its own.</p>
+    <p class="note">The music UI never opens by itself. But <strong>once you turn it on, it follows you</strong>: open it
+       on one page and it reappears on every other page and tab you visit — remembering your choice and your chosen
+       look — until you close it with the <strong>x</strong>. Close it there and it stops following everywhere, so you
+       turn it on once and forget about it.</p>
 
     <h3>The disc</h3>
     <table>
@@ -209,7 +213,26 @@
   </section>
 
   <section>
-    <h2><span class="n">6</span> What’s new in 1.3.0</h2>
+    <h2><span class="n">6</span> What's new in 1.3.1</h2>
+    <ul>
+      <li><strong>The disc and the bar now follow you.</strong> Turn the music player on once and it comes back on
+          every other page and tab you open — in the look you chose — until you close it with the <strong>x</strong>.
+          No more re-opening it on every site.</li>
+      <li><strong>No more manual refreshes.</strong> When you update or reload the extension, your open tabs swap to
+          the new version by themselves: the old player is torn down and the new one takes over, with no leftover,
+          duplicated or frozen disc.</li>
+      <li><strong>Fixed the "stuck" player.</strong> A glitchy disc or bar can no longer linger or pile up after a
+          reload or while you move between pages — it cleans itself up, and closing with the <strong>x</strong> turns
+          it off everywhere at once.</li>
+      <li><strong>Survives the browser parking the extension.</strong> Floaty reconnects on its own, so the waves and
+          controls keep working; if the extension is ever removed, the player tidies itself away.</li>
+      <li><strong>New tabs fill in instantly</strong> — a page that turns the player on shows the current song,
+          progress and waves straight away.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">7</span> What's new in 1.3.0</h2>
     <ul>
       <li><strong>Much lighter on your computer.</strong> Floaty now builds its window, waves and music UI
           <strong>only when you actually use them</strong> in a tab. Tabs where you never open Floaty cost almost
@@ -225,7 +248,7 @@
   </section>
 
   <section>
-    <h2><span class="n">7</span> What’s new in 1.2.0</h2>
+    <h2><span class="n">8</span> What's new in 1.2.0</h2>
     <ul>
       <li><strong>New music bar</strong> (<kbd>Alt</kbd>+<kbd>4</kbd>): a slim horizontal player with thumbnail,
           title/artist, a progress bar, the −5s / play / +5s buttons, background buttons, its own wave, and a close
@@ -247,7 +270,7 @@
   </section>
 
   <section>
-    <h2><span class="n">8</span> Good to know</h2>
+    <h2><span class="n">9</span> Good to know</h2>
     <ul>
       <li>The transparent disc lives <strong>inside the browser</strong>. Browsers cannot draw transparent windows over
           other apps, so it will <strong>not</strong> float above your desktop.</li>
@@ -267,19 +290,20 @@
   </section>
 
   <section>
-    <h2><span class="n">9</span> Troubleshooting</h2>
+    <h2><span class="n">10</span> Troubleshooting</h2>
     <ul>
-      <li><strong>Shortcuts do nothing?</strong> Reload the tab, then <strong>click the extension icon</strong> in the
-          toolbar: you should see <em>Floaty is active</em>. Floaty attaches itself to tabs you already had open, so a
-          reload is rarely needed. Reloading the extension also swaps the new version into open tabs automatically.</li>
-      <li><strong>Updated but it looks the same?</strong> Chrome keeps older copies of the script in tabs that were
-          already open. Just <strong>click the extension icon</strong> once on that tab (or refresh the page) and the new
-          version takes over — no full browser restart.</li>
+      <li><strong>Shortcuts do nothing?</strong> <strong>Click the extension icon</strong> in the toolbar: you should
+          see <em>Floaty is active</em>. Floaty attaches itself to tabs you already had open, so a reload is rarely
+          needed.</li>
+      <li><strong>Updated but it looks the same?</strong> Open tabs now swap to the new version by themselves. If a tab
+          ever seems stale, <strong>click the extension icon</strong> once on that tab and the new version takes over
+          instantly — no page refresh and no browser restart.</li>
       <li><strong>Mini window looks blank or won’t embed?</strong> Give it a second — Floaty tries three ways in turn
           (always-on-top window → live view → in-page panel). On very unusual sites only the panel is available.</li>
       <li><strong>Music UI is missing?</strong> Make sure Spotify / YouTube Music is actually <strong>playing</strong>,
-          then press <kbd>Alt</kbd> + <kbd>3</kbd> (disc) or <kbd>Alt</kbd> + <kbd>4</kbd> (bar). It is hidden by default
-          on purpose.</li>
+          then press <kbd>Alt</kbd> + <kbd>3</kbd> (disc) or <kbd>Alt</kbd> + <kbd>4</kbd> (bar). Once you turn it on it
+          stays on and follows you to other pages and tabs; close it with the <strong>x</strong> to switch it off
+          everywhere.</li>
       <li><strong>The wave isn’t moving with the music?</strong> For Spotify the browser has to allow tab-audio sharing.
           If it was blocked, Floaty falls back to a gentle animation. Showing the player right after the music starts
           usually fixes it.</li>
@@ -291,7 +315,7 @@
     </ul>
   </section>
 
-  <footer>Floaty Mini Player 1.3.0 · Works in Chrome / Edge 116+</footer>
+  <footer>Floaty Mini Player 1.3.1 · Works in Chrome / Edge 116+</footer>
 </div>
 </body>
 </html>
