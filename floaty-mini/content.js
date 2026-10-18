@@ -13,7 +13,7 @@
   var hostEl = null, toastT = 0, dropT = 0, watchT = 0, port = null, running = false,
       srcLoop = false, activePip = null, activeRestore = null, adTimer = 0, cancelCrop = null, mediaPlayFn = null;
 
-  const VERSION = '1.3.2';
+  const VERSION = '1.3.3';
 
   /* ───────────────────────────────────────────────────────────────────────────
      LIGHTWEIGHT BY DESIGN
@@ -564,9 +564,16 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
     el.bgr.addEventListener('click', onBg);
     el.bbgr.addEventListener('click', onBg);
 
-    // Bar background picker: hidden behind a palette button so the row stays short. It opens on
-    // hover with a mouse, on tap, and flips above/below whichever side has room.
-    const setPop = (on) => {
+    // Bar background picker: hidden behind a palette button so the row stays short. Hover (mouse)
+    // or tap opens it, and it flips above / below whichever side has room.
+    //
+    // Closing is deliberately lazy: the picker sits *outside* the button's box, so travelling the
+    // few pixels between them briefly leaves the button — an instant close would shut the options
+    // in the user's face before the mouse could reach them. So we wait a beat, cancel as soon as
+    // the pointer reaches either element, and re-check :hover before actually closing (and if the
+    // pointer does arrive after a close, entering the picker simply reopens it).
+    let closeT = 0;
+    function setPop(on) {
       if (!el.bpop) return;
       el.bpop.classList.toggle('on', on);
       if (!on) return;
@@ -579,10 +586,39 @@ button{all:unset;cursor:pointer;box-sizing:border-box}
       // stylesheet's `bottom` and over-constrain the box (the picker would collapse to its padding).
       el.bbgr.style.bottom = below ? 'auto' : 'calc(100% + 8px)';
       el.bbgr.style.top = below ? 'calc(100% + 8px)' : 'auto';
-    };
-    el.bpop.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setPop(true); });
-    el.bpop.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') setPop(false); });
-    el.bbtn.addEventListener('click', (e) => { e.stopPropagation(); setPop(!el.bpop.classList.contains('on')); });
+    }
+    function cancelClose() { if (closeT) { clearTimeout(closeT); closeT = 0; } }
+    function scheduleClose() {
+      cancelClose();
+      closeT = setTimeout(() => {
+        closeT = 0;
+        if (!ok()) return;
+        try { if (el.bpop.matches(':hover') || el.bbgr.matches(':hover')) return; } catch (e) {}
+        setPop(false);
+      }, 250);
+    }
+    const inPicker = (n) => !!n && (el.bpop.contains(n) || el.bbgr.contains(n));
+    el.bpop.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      cancelClose(); setPop(true);
+    });
+    el.bbgr.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') cancelClose(); });
+    el.bpop.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || inPicker(e.relatedTarget)) return;
+      scheduleClose();
+    });
+    el.bbgr.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || inPicker(e.relatedTarget)) return;
+      scheduleClose();
+    });
+    el.bbtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelClose();
+      // Clicking/tapping the icon only ever *opens*. With a mouse, hover usually beat you to it
+      // and the options are already there (snapping them shut on that click felt broken); a tap
+      // opens them, and either way they go away when you move off or tap anywhere else.
+      setPop(true);
+    });
   }
 
   // Taps/clicks outside the bar's palette button dismiss its background picker (module scope so

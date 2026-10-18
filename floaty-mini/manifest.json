@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Floaty Mini Player",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "minimum_chrome_version": "116",
   "description": "Lightweight mini player for any page (crop any region), video-only YouTube, a music disc + music bar for Spotify / YouTube Music, and auto ad-skip.",
   "permissions": ["storage", "scripting", "declarativeNetRequestWithHostAccess", "tabCapture", "offscreen"],
